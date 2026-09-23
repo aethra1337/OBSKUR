@@ -558,7 +558,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const brandHome = document.getElementById('brand-home');
     if (brandHome) brandHome.addEventListener('click', () => {
-        // Homepage reset ("refreshlenmiş gibi"): full soft reset to the
+        // Homepage reset (as if refreshed): full soft reset to the
         // initial state — clears file, preview, batch queue, audits and logs.
         if (previewImgUrl) { URL.revokeObjectURL(previewImgUrl); previewImgUrl = null; }
         const previewImg = document.getElementById('inspect-preview');

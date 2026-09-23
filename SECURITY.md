@@ -1,23 +1,24 @@
 # SECURITY — OBSKUR
 
-## Kapsam
-- Flask API (`app.py`), `core/` motorları, `templates/`, `static/js/`
-- Desteklenen formatlar: JPEG, PNG, WEBP, HEIC (magic-byte ile doğrulanır)
+## Scope
+- Flask API (`app.py`), `core/` engines, `templates/`, `static/js/`
+- Supported formats: JPEG, PNG, WEBP, HEIC (verified via magic bytes)
 
-## Korumalar
-- Magic-byte validation (`SecurityEngine.sniff_format`), uzantıya güvenilmez
+## Protections
+- Magic-byte validation (`SecurityEngine.sniff_format`), extensions are not trusted
 - `MAX_CONTENT_LENGTH = 16MB`, `MAX_IMAGE_PIXELS = 50MP` bomb guard
 - CSP (script-src self + unpkg, object-src none, frame-ancestors none), nosniff, no-referrer, COOP/CORP
-- XSS-safe render (textContent + escapeHtml), CSV formül enjeksiyon koruması
-- 500 hata detayları gizlenir, 400 validasyon mesajları kontrollüdür
-- Bağımlılık pinleri: `requirements.txt`
+- XSS-safe rendering (textContent + escapeHtml), CSV formula-injection protection
+- Error details are hidden (no internals in 500s), validation messages in 400s are controlled
+- Dependency pins: `requirements.txt`
 
-## Bildirim
-Güvenlik açığı bulursan issue açma — önce gizli bildir:
-- E-posta / DM belirt (repo sahibine ekle)
-- Etkilenen versiyon (`TOOL_VERSION`), PoC dosya + request örneği ekle
-- 90 gün sorumlu açıklama önerilir
+## Reporting
+Found a vulnerability? Do not open an issue — report it privately first:
+- State an email / DM contact (add the repo owner)
+- Include the affected version (`TOOL_VERSION`), a PoC file + request sample
+- 90-day responsible disclosure is recommended
 
-## Desteklenmeyenler
-- DoS için sınırsız batch (max 20 dosya / 16MB toplam)
-- CSRF token yok — auth/cookie yok, local-only model. İnternete açacaksan reverse proxy + auth ekle.
+## Non-goals
+- Unlimited batch for DoS (max 20 files / 16MB total)
+- No CSRF token — no auth/cookies, local-only model. If you expose it to the
+  internet, add a reverse proxy + auth in front.

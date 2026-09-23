@@ -2,58 +2,58 @@
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-white.svg)](LICENSE)
 
-Flask tabanlı, tamamen bellekte çalışan görüntü gizlilik ve adli bilişim aracı.
-JPEG / PNG / WEBP / HEIC (maks. 16 MB) yükleyin, EXIF / XMP / IPTC / ICC / PNG-text
-yüzeyini görün, Privacy Risk Score (0-100) alın, güvenle dışa aktarın.
+A Flask-based image privacy and forensics tool that runs entirely in memory.
+Upload JPEG / PNG / WEBP / HEIC (max. 16 MB), inspect the EXIF / XMP / IPTC /
+ICC / PNG-text surface, get a Privacy Risk Score (0-100), and export safely.
 
-Akış: `inspect → score → purge / selective / blur / spoof / edit → certificate`
+Flow: `inspect → score → purge / selective / blur / spoof / edit → certificate`
 
-Hiçbir dosya diske yazılmaz. Tüm işlemler RAM içinde yapılır.
+No file is ever written to disk. All processing happens in RAM.
 
-## İçindekiler
+## Contents
 
-- [Özellikler](#özellikler)
-- [Gereksinimler](#gereksinimler)
-- [Kurulum](#kurulum)
-- [Hızlı Başlat](#hızlı-başlat)
-- [Kullanım Kılavuzu](#kullanım-kılavuzu)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [User Guide](#user-guide)
 - [API](#api)
-- [Yapılandırma ve Limitler](#yapılandırma-ve-limitler)
-- [Güvenlik](#güvenlik)
-- [Proje Yapısı](#proje-yapısı)
-- [Marka](#marka)
-- [Sorun Giderme](#sorun-giderme)
-- [Katkı](#katkı)
-- [Lisans](#lisans)
+- [Configuration and Limits](#configuration-and-limits)
+- [Security](#security)
+- [Project Structure](#project-structure)
+- [Brand](#brand)
+- [Troubleshooting](#troubleshooting)
+- [Contributing](#contributing)
+- [License](#license)
 
-## Özellikler
+## Features
 
-- **Metadata Inspector:** GPS haritası (şehir/ülke çözümleme ile) + kamera / tarih /
-  yazılım tabloları + kapsayıcı başlıkları (EXIF, XMP, IPTC, ICC, PNG-text).
-- **Privacy Risk Index:** 0-100 risk skoru, tespit edilen riskler ve öneriler.
-- **Selective Sanitizer:** GPS, kamera, tarih, yazılım, sahiplik/yorum başlıklarını
-  ayrı ayrı seçerek temizleme.
-- **Full Purge:** Tüm metaveriyi sıfırlama (format korunur: JPEG/PNG/WEBP).
-- **GPS Blur:** Koordinatları kaba ızgaraya yuvarlama (city ~11 km / district ~1 km /
-  street ~100 m), rakımı silme; diğer etiketler korunur.
-- **Share Presets:** Instagram / X / WhatsApp için tek dokunuşla JPEG dışa aktarma.
-- **Profile Simulator:** Test için sentetik make/model/GPS enjeksiyonu.
-- **Tag Editor:** Tekil EXIF etiketlerini yerinde düzenleme (tarih formatı doğrulamalı).
-- **Batch Processor:** 20 dosyaya kadar toplu işlem, tek ZIP indirir.
-- **Session Audit + Certificate:** İşlem günlüğü (CSV dışa aktarma) ve SHA256
-  hash-zincirli imha sertifikası + indirilebilir JSON rapor.
-- **EN/TR arayüz:** Kalıcı dil seçimi, backend İngilizce kalır.
-- **Reverse-geocode anahtarı:** Şehir/ülke çözümleme varsayılan açıktır,
-  Configuration ekranından kapatılabilir (kapalıyken tam yerel mod).
+- **Metadata Inspector:** GPS map (with city/country resolution) + camera / date /
+  software tables + container headers (EXIF, XMP, IPTC, ICC, PNG-text).
+- **Privacy Risk Index:** 0-100 risk score with detected risks and recommendations.
+- **Selective Sanitizer:** Remove GPS, camera, date, software, ownership/comment
+  headers individually.
+- **Full Purge:** Wipe all metadata (format preserved: JPEG/PNG/WEBP).
+- **GPS Blur:** Round coordinates to a coarse grid (city ~11 km / district ~1 km /
+  street ~100 m), drop altitude; all other tags are preserved.
+- **Share Presets:** One-click JPEG export for Instagram / X / WhatsApp.
+- **Profile Simulator:** Inject synthetic make/model/GPS for testing.
+- **Tag Editor:** Edit individual EXIF tags in place (with date format validation).
+- **Batch Processor:** Process up to 20 files at once, download a single ZIP.
+- **Session Audit + Certificate:** Operation log (CSV export) and SHA256
+  hash-chained destruction certificate + downloadable JSON report.
+- **EN/TR interface:** Persistent language selection, backend stays in English.
+- **Reverse-geocode toggle:** City/country resolution is on by default and can be
+  turned off from the Configuration screen (fully local mode when off).
 
-## Gereksinimler
+## Requirements
 
 - Python 3.12+
 - pip
-- Docker (opsiyonel, konteyner ile çalıştırmak için)
-- Modern bir tarayıcı (harita görünümü için internet gerekir, çekirdek işlemler çevrimdışı çalışır)
+- Docker (optional, to run containerized)
+- A modern browser (internet is needed for the map view; core processing works offline)
 
-Bağımlılıklar (`requirements.txt`):
+Dependencies (`requirements.txt`):
 
 ```
 Flask>=3.1.0
@@ -62,19 +62,19 @@ piexif>=1.1.3
 pillow-heif>=0.18.0
 ```
 
-Not: `pillow-heif` yalnızca HEIC desteği içindir. Kurulu değilse uygulama çalışır,
-yalnızca HEIC dosyaları reddedilir.
+Note: `pillow-heif` is only needed for HEIC support. Without it the app still runs,
+only HEIC files are rejected.
 
-## Kurulum
+## Installation
 
-1. Repoyu klonlayın:
+1. Clone the repository:
 
 ```bash
-git clone <repo-url>
-cd Exif-data-remover-manupulator
+git clone https://github.com/aethra1337/OBSKUR.git
+cd OBSKUR
 ```
 
-2. Sanal ortam oluşturun ve bağımlılıkları kurun:
+2. Create a virtual environment and install dependencies:
 
 ```bash
 python -m venv venv
@@ -86,14 +86,14 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Uygulamayı başlatın:
+3. Start the application:
 
 ```bash
 python app.py
 # http://127.0.0.1:5000
 ```
 
-Docker ile kurulum:
+Docker installation:
 
 ```bash
 docker build -t obskur .
@@ -101,7 +101,7 @@ docker run -p 5000:5000 obskur
 # http://127.0.0.1:5000
 ```
 
-## Hızlı Başlat
+## Quick Start
 
 ```bash
 pip install -r requirements.txt
@@ -109,280 +109,280 @@ python app.py
 # http://127.0.0.1:5000
 ```
 
-Ardından tarayıcıda `http://127.0.0.1:5000` adresini açın, bir görüntü sürükleyip
-bırakın ve Inspection panelinde sonucu görün.
+Then open `http://127.0.0.1:5000` in your browser, drag and drop an image,
+and see the result in the Inspection panel.
 
-## Kullanım Kılavuzu
+## User Guide
 
-Bu bölüm arayüzdeki her modülün adım adım kullanımını anlatır. Genel prensip aynıdır:
-önce incele, sonra işle, en son denetle ve indir.
+This section explains each module step by step. The general principle is the same:
+inspect first, then process, finally audit and download.
 
-### 0. Genel akış
+### 0. General flow
 
-1. Hedef görüntüyü seçin veya sürükleyip bırakın.
-2. Inspection ekranında metaveriyi ve risk skorunu inceleyin.
-3. Aşağıdaki modüllerden biriyle görüntüyü işleyin.
-4. Audit önizlemede önce/sonra farkını ve sertifikayı kontrol edin, dosyayı indirin.
+1. Select the target image or drag and drop it.
+2. Review the metadata and the risk score on the Inspection screen.
+3. Process the image with one of the modules below.
+4. Check the before/after diff and the certificate in the Audit preview, then download.
 
-### 1. Inspect (İnceleme)
+### 1. Inspect
 
-Amaç: Dosyayı değiştirmeden ne içerdiğini görmek.
+Goal: See what the file contains without changing it.
 
-1. Görüntüyü yükleyin. Otomatik olarak `/api/inspect` çağrılır.
-2. Üst panelde format, boyut ve çözünürlüğü kontrol edin.
-3. `Privacy Risk Score` panelinde 0-100 skorunu, risk seviyesini, tespit edilen
-   riskleri ve önerileri okuyun.
-4. Metadata tablolarında kamera, tarih, yazılım ve konum alanlarını inceleyin.
-5. GPS varsa haritada işaretçiyi ve çözümlenen şehir/ülke bilgisini kontrol edin.
+1. Upload the image. `/api/inspect` is called automatically.
+2. Check format, size, and dimensions in the top panel.
+3. Read the 0-100 score, risk level, detected risks, and recommendations in the
+   `Privacy Risk Score` panel.
+4. Review camera, date, software, and location fields in the metadata tables.
+5. If GPS is present, check the marker on the map and the resolved city/country.
 
-İpucu: Risk skoru yüksekse önce hangi kategorinin (konum, cihaz, tarih) skoru
-yükselttiğine bakın, temizlik modunu ona göre seçin.
+Tip: If the risk score is high, first check which category (location, device, date)
+drives it, then pick the cleaning mode accordingly.
 
-### 2. Selective Sanitizer (Seçici Temizlik)
+### 2. Selective Sanitizer
 
-Amaç: Yalnızca seçtiğiniz kategorileri silmek, geri kalanı korumak.
+Goal: Remove only the categories you select, keep the rest.
 
-1. `Sanitizer` paneline geçin.
-2. Silinecek kutuları işaretleyin:
-   - `remove_gps`: Konum ve rakım
-   - `remove_camera`: Make, Model, Lens, Seri No
-   - `remove_datetime`: Çekim ve dijitalleştirme tarihleri
-   - `remove_software`: Yazılım / düzenleyici bilgisi
-   - `remove_descriptions`: Artist, Copyright, Açıklama, UserComment
-3. `Process` düğmesine basın.
-4. Audit ekranında `removed_keys` listesinin seçtiklerinizle eşleştiğini doğrulayın.
-5. `Download` ile `custom_<dosyaadı>` dosyasını indirin.
+1. Switch to the `Sanitizer` panel.
+2. Check the boxes to remove:
+   - `remove_gps`: Location and altitude
+   - `remove_camera`: Make, Model, Lens, Serial Number
+   - `remove_datetime`: Capture and digitized dates
+   - `remove_software`: Software / editor information
+   - `remove_descriptions`: Artist, Copyright, Description, UserComment
+3. Press `Process`.
+4. On the Audit screen, verify the `removed_keys` list matches your selection.
+5. Download the `custom_<filename>` file.
 
-Örnek: Yalnızca konum silmek istiyorsanız sadece `remove_gps` kutusunu açık bırakın.
+Example: To remove only location, leave just the `remove_gps` box checked.
 
-### 3. Full Purge (Tam Temizlik)
+### 3. Full Purge
 
-Amaç: Paylaşmadan önce tüm metaveriyi sıfırlamak.
+Goal: Wipe all metadata before sharing.
 
-1. `Purge` paneline geçin veya doğrudan `Purge` işlemini seçin.
-2. Kalite değerini kontrol edin (varsayılan 95).
-3. İşlemi çalıştırın.
-4. Audit ekranında skorun 0 veya 0'a yakın olduğunu ve `removed_count` değerinin
-   dolu olduğunu doğrulayın.
-5. `purged_<dosyaadı>` dosyasını indirin.
+1. Switch to the `Purge` panel or select the `Purge` operation directly.
+2. Check the quality value (default 95).
+3. Run the operation.
+4. On the Audit screen, verify the score is 0 or near 0 and `removed_count` is populated.
+5. Download the `purged_<filename>` file.
 
-Not: Çıktı formatı korunur (JPEG JPEG olarak, PNG PNG olarak, WEBP WEBP olarak kalır).
-HEIC girdiler JPEG olarak dışa aktarılır.
+Note: The output format is preserved (JPEG stays JPEG, PNG stays PNG, WEBP stays
+WEBP). HEIC inputs are exported as JPEG.
 
-### 4. GPS Blur (Konum Bulanıklaştırma)
+### 4. GPS Blur
 
-Amaç: Konumu tamamen silmeden kabaca gizlemek.
+Goal: Roughly hide the location without removing it entirely.
 
-1. `Blur` paneline geçin.
-2. Hassasiyet seçin:
-   - `city`: ~11 km ızgara (1 ondalık)
-   - `district`: ~1 km ızgara (2 ondalık, varsayılan)
-   - `street`: ~100 m ızgara (3 ondalık)
-3. İşlemi çalıştırın.
-4. Haritada işaretçinin yuvarlanmış konuma taşındığını ve rakımın silindiğini doğrulayın.
-5. `blurred_<dosyaadı>` dosyasını indirin.
+1. Switch to the `Blur` panel.
+2. Select precision:
+   - `city`: ~11 km grid (1 decimal, default is `district`)
+   - `district`: ~1 km grid (2 decimals, default)
+   - `street`: ~100 m grid (3 decimals)
+3. Run the operation.
+4. Verify on the map that the marker moved to the rounded location and altitude is gone.
+5. Download the `blurred_<filename>` file.
 
-Not: GPS yoksa modül güvenli şekilde tam temizliğe düşer. Diğer EXIF etiketleri korunur.
+Note: If there is no GPS, the module safely falls back to a full strip.
+Other EXIF tags are preserved.
 
-### 5. Share Presets (Paylaşım Önayarları)
+### 5. Share Presets
 
-Amaç: Sosyal medya için hızlı, izsiz JPEG üretmek.
+Goal: Quickly produce clean JPEGs for social media.
 
-1. `Share` paneline geçin.
-2. Preset seçin:
-   - `instagram`: uzun kenar 2048, kalite 85
-   - `x`: uzun kenar 2048, kalite 85
-   - `whatsapp`: uzun kenar 1600, kalite 80
-   - `original`: yeniden boyutlandırma yok, kalite 95
-3. İşlemi çalıştırın, `<preset>_<dosyaadı>.jpg` dosyasını indirin.
+1. Switch to the `Share` panel.
+2. Select a preset:
+   - `instagram`: long edge 2048, quality 85
+   - `x`: long edge 2048, quality 85
+   - `whatsapp`: long edge 1600, quality 80
+   - `original`: no resizing, quality 95
+3. Run the operation and download `<preset>_<filename>.jpg`.
 
-Tüm presetler metaveriyi tamamen siler ve çıktıyı JPEG olarak verir.
+All presets strip metadata completely and output JPEG.
 
-### 6. Profile Simulator (Simülasyon)
+### 6. Profile Simulator
 
-Amaç: Test ve eğitim için sahte cihaz/konum enjekte etmek.
+Goal: Inject a fake device/location for testing and training.
 
-1. `Simulator` paneline geçin.
-2. Profil seçin (`generic` veya listeden bir cihaz profili).
-3. İsteğe bağlı `fake_make`, `fake_model`, `fake_software` alanlarını doldurun.
-4. Geçerli bir enlem (-90 ile 90) ve boylam (-180 ile 180) girin.
-5. İşlemi çalıştırın, Audit ekranında `added_keys` içinde yeni GPS ve cihaz
-   alanlarının göründüğünü doğrulayın.
-6. `simulated_<dosyaadı>` dosyasını indirin.
+1. Switch to the `Simulator` panel.
+2. Select a profile (`generic` or a device profile from the list).
+3. Optionally fill in `fake_make`, `fake_model`, `fake_software`.
+4. Enter a valid latitude (-90 to 90) and longitude (-180 to 180).
+5. Run the operation and verify on the Audit screen that `added_keys` shows the new
+   GPS and device fields.
+6. Download the `simulated_<filename>` file.
 
-Uyarı: Bu modül adli test amaçlıdır. Başkasını yanıltacak şekilde kullanmayın.
+Warning: This module is for forensic testing. Do not use it to mislead anyone.
 
-### 7. Tag Editor (Etiket Düzenleyici)
+### 7. Tag Editor
 
-Amaç: Tekil EXIF alanlarını düzeltmek veya silmek.
+Goal: Fix or delete individual EXIF fields.
 
-1. `Tag Editor` paneline geçin.
-2. Düzenlenebilir etiket listesinden alan seçin (`make`, `model`, `software`,
+1. Switch to the `Tag Editor` panel.
+2. Pick a field from the editable tag list (`make`, `model`, `software`,
    `artist`, `copyright`, `imagedescription`, `datetime`, `datetimeoriginal`,
    `datetimedigitized`, `usercomment`, `lensmodel`, `bodyserialnumber`).
-3. Yeni değeri yazın veya boş bırakarak silin.
-4. Tarih alanları için `YYYY:MM:DD HH:MM:SS` formatını kullanın
-   (örnek: `2024:05:10 14:30:00`). Format yanlışsa işlem reddedilir.
-5. GPS silmek için `deletions` alanına `gps` yazın.
-6. İşlemi çalıştırın, `edited_<dosyaadı>` dosyasını indirin.
+3. Type the new value, or leave it empty to delete the tag.
+4. For date fields use the `YYYY:MM:DD HH:MM:SS` format
+   (example: `2024:05:10 14:30:00`). Wrong formats are rejected.
+5. To remove GPS, write `gps` in the `deletions` field.
+6. Run the operation and download the `edited_<filename>` file.
 
-### 8. Batch Processor (Toplu İşlem)
+### 8. Batch Processor
 
-Amaç: En fazla 20 dosyayı tek seferde işlemek.
+Goal: Process up to 20 files in one go.
 
-1. `Batch` paneline geçin.
-2. En fazla 20 görüntü seçin (her biri 16 MB altında olmalı).
-3. Mod seçin: `purge`, `selective`, `blur` veya `spoof`.
-4. Seçilen moda ait ek alanları doldurun (örnek: blur için precision, spoof için lat/lng).
-5. İşlemi çalıştırın, `obskur_batch_<mod>.zip` dosyasını indirin.
-6. ZIP içindeki `cleaned_<ad>` dosyalarının adlarını ve formatlarını kontrol edin.
+1. Switch to the `Batch` panel.
+2. Select up to 20 images (each must be under 16 MB).
+3. Select a mode: `purge`, `selective`, `blur`, or `spoof`.
+4. Fill in the extra fields for the selected mode (example: precision for blur,
+   lat/lng for spoof).
+5. Run the operation and download `obskur_batch_<mode>.zip`.
+6. Check the names and formats of the `cleaned_<name>` files inside the ZIP.
 
-Not: Bozuk veya desteklenmeyen dosyalar sessizce atlanır, geçerli dosyalar işlenir.
+Note: Corrupt or unsupported files are silently skipped, valid files are processed.
 
-### 9. Audit, Certificate ve Report (Denetim)
+### 9. Audit, Certificate, and Report
 
-Her işlemden sonra:
+After every operation:
 
-1. `Audit` panelinde boyut farkını (`size_before_kb` / `size_after_kb`),
-   skor değişimini (`score_delta`) ve `removed_keys` / `added_keys` farklarını okuyun.
-2. `Certificate` alanında `sha256_before`, `sha256_after`, işlem adı, kalite ve
-   UTC zaman damgasını kontrol edin.
-3. `Download JSON Report` ile `/api/report` çıktısını saklayın.
-4. `Export CSV` ile oturum günlüğünü tablo olarak indirin.
+1. On the `Audit` panel, read the size difference (`size_before_kb` /
+   `size_after_kb`), the score change (`score_delta`), and the
+   `removed_keys` / `added_keys` diffs.
+2. In the `Certificate` section, check `sha256_before`, `sha256_after`,
+   the operation name, quality, and the UTC timestamp.
+3. Keep the `/api/report` output via `Download JSON Report`.
+4. Download the session log as a table via `Export CSV`.
 
-Sertifika, hangi dosyanın hangi işlemden geçtiğini hash zinciri ile kanıtlar.
+The certificate proves which file went through which operation with a hash chain.
 
-### 10. Dil ve Gizlilik Ayarları
+### 10. Language and Privacy Settings
 
-- Sağ üstteki dil seçici ile `EN` / `TR` arasında geçin. Seçim `obskur-lang`
-  anahtarıyla tarayıcıda saklanır, sayfa yenilense bile korunur.
-- `Configuration` ekranından JPEG kalitesini seçin (85 / 95 / 100).
-- `Configuration` ekranından reverse-geocode anahtarını kapatabilirsiniz
-  (`obskur-geocode`). Kapalıyken şehir/ülke çözümleme yapılmaz ve uygulama
-  harita döşemeleri dışında ağa çıkmadan tam yerel çalışır.
+- Switch between `EN` / `TR` with the language selector in the top bar. The choice
+  is stored in the browser under the `obskur-lang` key and survives reloads.
+- Select the JPEG quality on the `Configuration` screen (85 / 95 / 100).
+- Turn the reverse-geocode toggle off on the `Configuration` screen
+  (`obskur-geocode`). When off, no city/country resolution is performed and the app
+  runs fully locally except for map tiles.
 
 ## API
 
-Tüm işlem endpointleri `POST` + `multipart/form-data` kullanır (`image` alanı).
-Batch endpointi `images` alanıyla çoklu dosya alır.
+All operation endpoints use `POST` + `multipart/form-data` (the `image` field).
+The batch endpoint takes multiple files via the `images` field.
 
-| Endpoint | Açıklama |
+| Endpoint | Description |
 |---|---|
-| `/api/inspect` | Metadata + risk skoru (JSON) |
-| `/api/process-and-audit` | İşle, önce/sonra + diff + sertifika döndür (JSON) |
-| `/api/report` | İndirilebilir adli rapor (JSON) |
-| `/api/selective-clean` | Seçici temizlik + dosya indir |
-| `/api/purge` | Tam temizlik + dosya indir |
-| `/api/blur` | GPS bulanıklaştırma + dosya indir |
-| `/api/spoof` | Sentetik profil enjeksiyonu + dosya indir |
-| `/api/edit-tags` | Etiket düzenleme + dosya indir |
-| `/api/share-preset` | Platform önayarı (`instagram`, `x`, `whatsapp`, `original`) |
-| `/api/batch-process` | Toplu işlem (`images` alanı, maks. 20), ZIP indirir |
-| `/api/preview` | Tarayıcının açamadığı formatlar (HEIC) için JPEG önizleme |
+| `/api/inspect` | Metadata + risk score (JSON) |
+| `/api/process-and-audit` | Process, return before/after + diff + certificate (JSON) |
+| `/api/report` | Downloadable forensic report (JSON) |
+| `/api/selective-clean` | Selective cleaning + file download |
+| `/api/purge` | Full cleaning + file download |
+| `/api/blur` | GPS blurring + file download |
+| `/api/spoof` | Synthetic profile injection + file download |
+| `/api/edit-tags` | Tag editing + file download |
+| `/api/share-preset` | Platform preset (`instagram`, `x`, `whatsapp`, `original`) |
+| `/api/batch-process` | Batch processing (`images` field, max. 20), downloads ZIP |
+| `/api/preview` | JPEG preview for formats browsers cannot render (HEIC) |
 
-curl örneği (inceleme):
+curl example (inspect):
 
 ```bash
 curl -X POST http://127.0.0.1:5000/api/inspect \
-  -F "image=@ornek.jpg"
+  -F "image=@sample.jpg"
 ```
 
-curl örneği (tam temizlik):
+curl example (full purge):
 
 ```bash
 curl -X POST http://127.0.0.1:5000/api/purge \
-  -F "image=@ornek.jpg" \
+  -F "image=@sample.jpg" \
   -F "quality=95" \
-  --output purged_ornek.jpg
+  --output purged_sample.jpg
 ```
 
-curl örneği (seçici temizlik):
+curl example (selective clean):
 
 ```bash
 curl -X POST http://127.0.0.1:5000/api/selective-clean \
-  -F "image=@ornek.jpg" \
+  -F "image=@sample.jpg" \
   -F "remove_gps=true" \
   -F "remove_camera=false" \
   -F "remove_datetime=true" \
   -F "remove_software=true" \
   -F "remove_descriptions=true" \
-  --output custom_ornek.jpg
+  --output custom_sample.jpg
 ```
 
-## Yapılandırma ve Limitler
+## Configuration and Limits
 
 - `MAX_CONTENT_LENGTH = 16 MB`, `MAX_IMAGE_PIXELS = 50 MP` (decompression-bomb guard)
-- Batch limiti: en fazla 20 dosya
-- JPEG dışa aktarma kalitesi: Configuration ekranı (85 / 95 / 100)
-- Reverse-geocode: Configuration ekranı (`obskur-geocode`, varsayılan açık)
-- Dil: üst bar seçimi (`obskur-lang`, varsayılan `en`)
-- Desteklenen formatlar: JPEG, PNG, WEBP, HEIC (magic-byte ile doğrulanır)
+- Batch limit: max. 20 files
+- JPEG export quality: Configuration screen (85 / 95 / 100)
+- Reverse-geocode: Configuration screen (`obskur-geocode`, on by default)
+- Language: top bar selector (`obskur-lang`, default `en`)
+- Supported formats: JPEG, PNG, WEBP, HEIC (verified via magic bytes)
 
-## Güvenlik
+## Security
 
-- Magic-byte doğrulama (uzantıya güvenilmez), HEIC marka kontrolü
+- Magic-byte validation (extensions are not trusted), HEIC brand check
 - CSP + `nosniff` + `no-referrer` + COOP/CORP, `X-Frame-Options: DENY`
-- XSS-safe render, CSV formül-enjeksiyon koruması, dosya adı dezenfeksiyonu
-- Hata detayları gizlenir (500 içermez), işlem sonrası bellek temizliği
-- Detay: [`SECURITY.md`](SECURITY.md)
+- XSS-safe rendering, CSV formula-injection protection, filename sanitization
+- Error details are hidden (no internals in 500s), memory cleanup after processing
+- Details: [`SECURITY.md`](SECURITY.md)
 
-## Proje Yapısı
+## Project Structure
 
 ```
-app.py                    Flask uygulaması ve API route'ları
+app.py                    Flask application and API routes
 core/
-  __init__.py             HEIF/HEIC desteği kaydı
-  exif_reader.py          Metadata okuma (EXIF/XMP/IPTC/ICC/PNG-text)
-  privacy_scorer.py       0-100 gizlilik risk skoru
-  exif_cleaner.py         purge / selective / blur / edit / share-preset motoru
-  metadata_simulator.py   Sentetik profil enjeksiyonu
-  security_engine.py      Magic-byte doğrulama ve bellek temizliği
-  batch_processor.py      Çoklu görüntüden ZIP üretimi
-templates/index.html      Tek sayfa arayüz (blueprint teması)
+  __init__.py             HEIF/HEIC support registration
+  exif_reader.py          Metadata reading (EXIF/XMP/IPTC/ICC/PNG-text)
+  privacy_scorer.py       0-100 privacy risk score
+  exif_cleaner.py         purge / selective / blur / edit / share-preset engine
+  metadata_simulator.py   Synthetic profile injection
+  security_engine.py      Magic-byte validation and memory cleanup
+  batch_processor.py      Multi-image to ZIP processing
+templates/index.html      Single-page interface (blueprint theme)
 static/
   favicon.svg             Redacted-O mark
-  logo.png                Arayüzde kullanılan logo
-  js/app.js               Arayüz akışı
-  js/i18n.js              EN/TR çeviriler
+  logo.png                Logo used in the interface
+  js/app.js               Interface flow
+  js/i18n.js              EN/TR translations
 brand/                    logo.svg, logo-wide.svg, logo-light.svg, social-preview.svg, BRAND.md
-Dockerfile                Konteyner kurulumu
-requirements.txt          Python bağımlılıkları
-DESIGN.md                 Tasarım kaydı (v5 Blueprint)
-SECURITY.md               Güvenlik modeli
+Dockerfile                Container setup
+requirements.txt          Python dependencies
+DESIGN.md                 Design record (v5 Blueprint)
+SECURITY.md               Security model
 ```
 
-## Marka
+## Brand
 
-Detay: [`brand/BRAND.md`](brand/BRAND.md) · Logo: `brand/logo.svg` ·
-Geniş kilitlenme: `brand/logo-wide.svg` · Tasarım: [`DESIGN.md`](DESIGN.md)
+Details: [`brand/BRAND.md`](brand/BRAND.md) · Logo: `brand/logo.svg` ·
+Wide lockup: `brand/logo-wide.svg` · Design: [`DESIGN.md`](DESIGN.md)
 
-## Sorun Giderme
+## Troubleshooting
 
-- `Invalid or corrupted image format`: Dosya magic-byte kontrolünden geçemedi.
-  Dosyanın gerçek bir JPEG/PNG/WEBP/HEIC olduğunu doğrulayın, uzantıyı elle
-  değiştirdiyseniz orijinaline döndürün.
-- `HEIC detected but HEIC support is not installed`: `pip install pillow-heif`
-  çalıştırın veya dosyayı JPEG/PNG olarak kaydedip tekrar deneyin.
-- `Image exceeds the 50MP safety limit`: Görüntü 50 megapikselden büyük.
-  Dosyayı küçültüp tekrar yükleyin.
-- `413 Request Entity Too Large`: Dosya 16 MB sınırını aşıyor. Dosyayı sıkıştırın
-  veya yeniden boyutlandırın.
-- Harita görünmüyor: Harita döşemeleri ağ gerektirir. Çevrimdışıysanız çekirdek
-  temizlik özellikleri çalışmaya devam eder, yalnızca harita ve şehir çözümleme
-  devre dışı kalır.
-- Şehir/ülke görünmüyor: `Configuration` ekranında reverse-geocode anahtarının
-  açık olduğunu kontrol edin.
-- Port çakışması: `app.py` içinde `port=5000` değerini değiştirin veya
-  `docker run -p 8080:5000 obskur` ile farklı porttan yayınlayın.
+- `Invalid or corrupted image format`: The file failed the magic-byte check.
+  Verify the file is a real JPEG/PNG/WEBP/HEIC; if you renamed the extension
+  manually, restore the original.
+- `HEIC detected but HEIC support is not installed`: Run `pip install pillow-heif`
+  or re-save the file as JPEG/PNG and try again.
+- `Image exceeds the 50MP safety limit`: The image is larger than 50 megapixels.
+  Downscale it and upload again.
+- `413 Request Entity Too Large`: The file exceeds the 16 MB limit. Compress or
+  resize it.
+- Map not showing: Map tiles need network access. Offline, the core cleaning
+  features keep working; only the map and city resolution are disabled.
+- City/country missing: Check that the reverse-geocode toggle is on in the
+  `Configuration` screen.
+- Port conflict: Change `port=5000` in `app.py` or publish a different port with
+  `docker run -p 8080:5000 obskur`.
 
-## Katkı
+## Contributing
 
-1. Repoyu fork edin.
-2. Yeni bir dal açın (`git checkout -b ozellik/kisa-ad`).
-3. Değişiklikleri yapın ve test edin (`python app.py` ile manuel test).
-4. Commit edin ve push edin.
-5. Pull Request açın, değişikliği ve test adımlarını açıklayın.
+1. Fork the repository.
+2. Create a new branch (`git checkout -b feature/short-name`).
+3. Make your changes and test them (manual test with `python app.py`).
+4. Commit, push, and open a Pull Request describing the change and test steps.
 
-## Lisans
+## License
 
 MIT — [`LICENSE`](LICENSE)

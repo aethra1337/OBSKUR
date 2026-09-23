@@ -1,24 +1,27 @@
 # BRAND — OBSKUR
 
-> Stay in the Dark / Karanlıkta Kal. 100% local EXIF forensics.
+> Stay in the Dark. 100% local EXIF forensics.
 
-## 1. Hikaye
-Her fotoğraf yer, cihaz ve an fısıldar. OBSKUR bu fısıltıyı görünür kılıp siler.
+## 1. Story
+Every photo whispers place, device, and moment. OBSKUR makes that whisper visible,
+then deletes it.
 `inspect → score → purge/spoof → certificate`
 
-## 2. İsim
-- **OBSKUR** — karanlık, modern, premium. TR telaffuz, global yazım.
+## 2. Name
+- **OBSKUR** — dark, modern, premium. Turkish pronunciation, global spelling.
 - Tagline EN: `STAY IN THE DARK` / TR: `KARANLIKTA KAL`
 
 ## 3. Logo
-- `logo.svg`: blueprint tile, redacted-O in white line. Kalın dikey O + ortadan taşan yatay bar, keskin 90° köşe.
-- `logo-light.svg`: açık zeminler için (blueprint mavisi `#0C2745` mark).
-- `social-preview.svg`: GitHub social preview (1280x640) — blueprint grid + pafta çerçevesi.
-- `logo-wide.svg`: yatay kilitlenme (476x192) — O harfi cap-height'e ayarlı redacted-O + BSKUR.
-- Not: `logo-wide.svg` ve `social-preview.svg` içindeki yazılar Chakra Petch outline'ına çevrilidir (font bağımsız, her yerde aynı render).
-- Kural: hep caps, tracking +8, gradient yok, gölge yok.
+- `logo.svg`: blueprint tile, redacted-O in white line. Bold vertical O with a
+  horizontal bar crossing through (protruding, sharp 90° corners).
+- `logo-light.svg`: for light backgrounds (blueprint blue `#0C2745` mark).
+- `social-preview.svg`: GitHub social preview (1280x640) — blueprint grid + title-block frame.
+- `logo-wide.svg`: horizontal lockup (476x192) — redacted-O sized to cap-height + BSKUR.
+- Note: the lettering inside `logo-wide.svg` and `social-preview.svg` is converted to
+  Chakra Petch outlines (font-independent, renders identically everywhere).
+- Rule: always caps, tracking +8, no gradients, no shadows.
 
-## 4. Renkler (v5 Blueprint — derin lacivert)
+## 4. Colors (v5 Blueprint — deep navy)
 ```
 --bg-root #040F1E
 --bg-surface #071A30
@@ -32,15 +35,15 @@ Her fotoğraf yer, cihaz ve an fısıldar. OBSKUR bu fısıltıyı görünür k�
 --void-glow rgba(255,255,255,0.05)
 ```
 
-## 5. Tipografi (hepsi OFL, open-source uyumlu)
-- Komple: Chakra Petch 400/500/600/700 (display + UI + data)
-- Fallback: Inter (sans) / JetBrains Mono (mono) — font yüklenemezse
+## 5. Typography (all OFL, open-source compatible)
+- Everything: Chakra Petch 400/500/600/700 (display + UI + data)
+- Fallback: Inter (sans) / JetBrains Mono (mono) — if fonts fail to load
 
-## 6. İmza anları
+## 6. Signature moments
 1. 320px void dropzone + halo
-2. Mono risk skoru `90/100` + HIGH RISK rozeti
+2. Mono risk score `90/100` + HIGH RISK badge
 3. Destruction certificate `sha256_before/after`
 
-## Geri alma
-- Yayına almadan önce çalışan bir kopyayı yedekle; geri dönüş en temiz yoldan yapılır:
-  değişen dosyaları yedekten geri kopyala.
+## Rollback
+- Before shipping, back up a working copy; the cleanest rollback is:
+  copy the changed files back from the backup.
