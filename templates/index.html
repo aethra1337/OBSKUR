@@ -1,0 +1,1682 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBSKUR — Stay in the Dark</title>
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}?v=6">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.css" crossorigin="" />
+    <script src="https://unpkg.com/maplibre-gl@4/dist/maplibre-gl.js" crossorigin=""></script>
+
+    <style>
+        /* OBSKUR — Dark Operating System (Operate, restrained) */
+        :root {
+            --bg-root: #040f1e;
+            --bg-surface: #071a30;
+            --bg-panel: #0b2440;
+            --bg-hover: #10294a;
+            --bg-active: #16395e;
+
+            --border-color: #2a4f76;
+            --border-subtle: #162c48;
+            --border-focus: #ffffff;
+
+            --text-primary: #f2f7fc;
+            --text-muted: #a9c3d9;
+            --text-dark: #7fa6c2;
+
+            --accent: #f2f7fc;
+            --accent-hover: #ffffff;
+            --accent-ink: #040f1e;
+            --accent-blue: #f2f7fc;
+            --accent-blue-hover: #ffffff;
+            
+            --color-safe: #22c55e;
+            --color-warning: #eab308;
+            --color-danger: #ef4444;
+
+            --font-display: 'Chakra Petch', 'Inter', sans-serif;
+            --font-sans: 'Chakra Petch', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            --font-mono: 'Chakra Petch', 'JetBrains Mono', monospace;
+            --void-glow: rgba(255, 255, 255, 0.05);
+            
+            --font-xs: 11px;
+            --font-sm: 13px;
+            --font-md: 15px;
+            --font-lg: 18px;
+            --font-xl: 22px;
+
+            --space-1: 4px;
+            --space-2: 8px;
+            --space-3: 12px;
+            --space-4: 16px;
+            --space-6: 24px;
+            --space-8: 32px;
+            --space-12: 48px;
+
+            --radius-sm: 4px;
+            --radius-md: 6px;
+            --transition-fast: 0.12s ease;
+        }
+
+        ::selection {
+            background: #ffffff;
+            color: #040f1e;
+        }
+
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #050f1e;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #2a4f76;
+            border-radius: 5px;
+            border: 2px solid #050f1e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-root);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            font-size: var(--font-sm);
+            line-height: 1.5;
+            min-height: 100vh;
+            overflow: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        button:focus-visible, input:focus-visible, select:focus-visible {
+            outline: 1px solid var(--border-focus);
+            outline-offset: 2px;
+        }
+
+        .app-shell {
+            display: flex;
+            flex-direction: column;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        /* TOP UTILITY BAR */
+        .top-bar {
+            height: 56px;
+            background: var(--bg-surface);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 var(--space-6);
+            flex-shrink: 0;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        .brand-logo {
+            display: block;
+            flex-shrink: 0;
+            height: 32px;
+            width: auto;
+        }
+
+        .brand-home {
+            background: none;
+            border: none;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+        }
+
+        .brand-home:hover .brand-logo {
+            filter: brightness(1.15);
+        }
+
+        .brand-tagline {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-dark);
+            letter-spacing: 1.5px;
+        }
+
+        .version-tag {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            background: var(--bg-hover);
+            padding: 3px 8px;
+            border-radius: var(--radius-sm);
+        }
+
+        .system-status {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            white-space: nowrap;
+            flex-shrink: 0;
+            gap: var(--space-3);
+        }
+
+        .sec-indicator {
+            color: var(--color-safe);
+        }
+
+        .lang-toggle {
+            position: relative;
+            display: flex;
+            gap: 2px;
+            padding: 2px;
+            background: var(--bg-root);
+            border: 1px solid var(--border-color);
+            border-radius: 999px;
+            flex-shrink: 0;
+        }
+
+        .lang-toggle button {
+            position: relative;
+            z-index: 1;
+            width: 40px;
+            padding: 4px 0;
+            background: none;
+            border: none;
+            color: var(--text-dark);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-align: center;
+            cursor: pointer;
+            border-radius: 999px;
+            transition: color 0.2s ease;
+        }
+
+        .lang-toggle button:hover {
+            color: var(--text-muted);
+        }
+
+        .lang-toggle button.active {
+            color: var(--accent-ink);
+        }
+
+        .lang-toggle button.active:hover {
+            color: var(--accent-ink);
+        }
+
+        .lang-thumb {
+            position: absolute;
+            z-index: 0;
+            top: 2px;
+            bottom: 2px;
+            left: 2px;
+            width: 40px;
+            background: var(--accent);
+            border-radius: 999px;
+            transition: transform 0.28s cubic-bezier(0.6, 0, 0.2, 1.15);
+        }
+
+        .lang-toggle[data-current="tr"] .lang-thumb {
+            transform: translateX(42px);
+        }
+
+        .workspace {
+            transition: opacity 0.16s ease;
+        }
+
+        .workspace.lang-fade {
+            opacity: 0;
+        }
+
+        /* APP BODY */
+        .app-body {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 220px;
+            background: var(--bg-surface);
+            border-right: 1px solid var(--border-color);
+            padding: var(--space-4) var(--space-2);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            flex-shrink: 0;
+        }
+
+        .nav-group {
+            margin-bottom: var(--space-6);
+        }
+
+        .nav-label {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            color: var(--text-dark);
+            padding: 0 var(--space-2) var(--space-2);
+            font-weight: 600;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-item {
+            width: 100%;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            padding: var(--space-2) var(--space-3);
+            text-align: left;
+            font-family: inherit;
+            font-size: var(--font-sm);
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            margin-bottom: 2px;
+            transition: background var(--transition-fast), color var(--transition-fast);
+        }
+
+        .nav-item:hover {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-item.active {
+            background: var(--border-color);
+            color: var(--text-primary);
+            box-shadow: inset 2px 0 0 var(--accent);
+        }
+
+        .nav-item:active {
+            transform: scale(0.98);
+        }
+
+        .nav-key {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            color: var(--text-dark);
+        }
+
+        .nav-item.active .nav-key {
+            color: var(--accent-blue);
+        }
+
+        .nav-item.locked {
+            opacity: 0.35;
+            cursor: not-allowed;
+        }
+
+        .nav-item.locked:hover {
+            background: none;
+            color: var(--text-muted);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding-top: var(--space-3);
+        }
+
+        .audit-badge {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .audit-badge .dot {
+            width: 6px;
+            height: 6px;
+            background: var(--color-safe);
+            border-radius: 50%;
+        }
+
+        /* WORKSPACE */
+        .workspace {
+            flex: 1;
+            overflow-y: auto;
+            padding: var(--space-8) var(--space-12);
+            background-color: var(--bg-root);
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+                linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+            background-size: 22px 22px, 22px 22px, 110px 110px, 110px 110px;
+        }
+
+        .workspace-view {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        /* Drawing sheet: hairline frame + registration corners */
+        .workspace-view, .drop-wrapper {
+            position: relative;
+            border: 1px solid var(--border-subtle);
+            background: rgba(3, 12, 24, 0.9);
+            padding: var(--space-8);
+        }
+
+        .workspace-view::before, .drop-wrapper::before {
+            content: "";
+            position: absolute;
+            inset: 6px;
+            pointer-events: none;
+            opacity: 0.7;
+            background:
+                linear-gradient(var(--border-focus), var(--border-focus)) left top / 12px 1px,
+                linear-gradient(var(--border-focus), var(--border-focus)) left top / 1px 12px,
+                linear-gradient(var(--border-focus), var(--border-focus)) right top / 12px 1px,
+                linear-gradient(var(--border-focus), var(--border-focus)) right top / 1px 12px,
+                linear-gradient(var(--border-focus), var(--border-focus)) left bottom / 12px 1px,
+                linear-gradient(var(--border-focus), var(--border-focus)) left bottom / 1px 12px,
+                linear-gradient(var(--border-focus), var(--border-focus)) right bottom / 12px 1px,
+                linear-gradient(var(--border-focus), var(--border-focus)) right bottom / 1px 12px;
+            background-repeat: no-repeat;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        /* DROPZONE */
+        .drop-wrapper {
+            max-width: 600px;
+            margin: var(--space-12) auto 0;
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-6);
+        }
+
+        .drop-hero-header {
+            text-align: center;
+        }
+
+        .drop-hero-header h2 {
+            font-size: var(--font-lg);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+        }
+
+        .drop-hero-header p {
+            color: var(--text-muted);
+            font-size: var(--font-sm);
+        }
+
+        .drop-box {
+            border: 1px dashed var(--border-color);
+            background: var(--bg-surface);
+            border-radius: 50%;
+            width: 320px;
+            height: 320px;
+            margin: 0 auto;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color var(--transition-fast), background-color var(--transition-fast), transform var(--transition-fast), box-shadow var(--transition-fast);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: var(--space-4);
+            position: relative;
+            box-shadow: 0 0 120px rgba(244, 244, 245, 0.06);
+        }
+
+        .drop-box:hover, .drop-box.dragover {
+            border-color: var(--accent);
+            background-color: var(--bg-panel);
+            box-shadow: 0 0 160px rgba(244, 244, 245, 0.12);
+        }
+
+        .drop-box:active {
+            transform: scale(0.99);
+        }
+
+        /* Instrument dressing: dotted grid + cardinal ticks on the void */
+        .drop-box {
+            background-image: radial-gradient(circle, rgba(244, 244, 245, 0.08) 1px, transparent 1.4px);
+            background-size: 22px 22px;
+        }
+
+        .drop-box::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            pointer-events: none;
+            opacity: 0.45;
+            background:
+                linear-gradient(var(--text-muted), var(--text-muted)) center top / 14px 1px,
+                linear-gradient(var(--text-muted), var(--text-muted)) center bottom / 14px 1px,
+                linear-gradient(var(--text-muted), var(--text-muted)) left center / 1px 14px,
+                linear-gradient(var(--text-muted), var(--text-muted)) right center / 1px 14px;
+            background-repeat: no-repeat;
+            transition: opacity var(--transition-fast);
+        }
+
+        .drop-box:hover::before, .drop-box.dragover::before {
+            opacity: 1;
+        }
+
+        .drop-icon-container {
+            width: 56px;
+            height: 56px;
+            background: transparent;
+            border: 1px solid var(--text-muted);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-text-group {
+            max-width: 220px;
+        }
+
+        .drop-icon {
+            font-size: 1.2rem;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .drop-icon svg {
+            display: block;
+        }
+
+        .local-processing-banner svg {
+            flex-shrink: 0;
+        }
+
+        /* Risk panel is the focal point: double-rule instrument frame */
+        .risk-frame {
+            outline: 1px solid var(--border-subtle);
+            outline-offset: 3px;
+        }
+
+        /* One authored motion moment: validation ping, motion-safe */
+        .audit-badge .dot {
+            animation: obskur-ping 2.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        @keyframes obskur-ping {
+            0% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.45);
+            }
+            70% {
+                box-shadow: 0 0 0 7px rgba(34, 197, 94, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(34, 197, 94, 0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        .drop-primary {
+            font-weight: 600;
+            font-size: var(--font-md);
+            color: var(--text-primary);
+        }
+
+        .drop-secondary {
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+        }
+
+        .local-processing-banner {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-subtle);
+            padding: var(--space-3) var(--space-4);
+            border-radius: var(--radius-sm);
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: var(--space-3);
+        }
+
+        /* INSPECT & PANEL LAYOUTS */
+        .view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: var(--space-6);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: var(--space-3);
+        }
+
+        .view-header h2 {
+            font-size: var(--font-lg);
+            font-weight: 600;
+        }
+
+        .view-sub {
+            color: var(--text-muted);
+            font-size: var(--font-sm);
+        }
+
+        .inspect-layout {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: var(--space-6);
+        }
+
+        .spec-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .panel-section {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: var(--space-3);
+            border-radius: var(--radius-sm);
+        }
+
+        .section-title {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+            letter-spacing: 0.5px;
+        }
+
+        /* TARGET PREVIEW STYLES */
+        .preview-box {
+            background: #040d1a;
+            border: 1px solid var(--border-color);
+            height: 180px;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+            position: relative;
+        }
+
+        .preview-box img {
+            max-width: 100% !important;
+            max-height: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            object-fit: contain !important;
+            display: block !important;
+            margin: auto !important;
+        }
+
+        .file-details {
+            margin-top: var(--space-3);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: var(--font-xs);
+        }
+
+        .detail-row span {
+            color: var(--text-muted);
+        }
+
+        .mono {
+            font-family: var(--font-mono);
+        }
+
+        .text-safe {
+            color: var(--color-safe);
+        }
+
+        .tnum, .score-num, .detail-row strong, .version-tag, .sim-geo-display strong,
+        .nav-key, #batch-list {
+            font-variant-numeric: tabular-nums;
+        }
+
+        .risk-score-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: var(--space-2);
+        }
+
+        .score-num {
+            font-family: var(--font-mono);
+            font-size: var(--font-xl);
+            font-weight: 600;
+        }
+
+        .score-denom {
+            font-size: var(--font-sm);
+            color: var(--text-muted);
+        }
+
+        .risk-tag {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            padding: 2px 8px;
+            border-radius: var(--radius-sm);
+            font-weight: 600;
+        }
+
+        .badge-low {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--color-safe);
+            border: 1px solid var(--color-safe);
+        }
+
+        .badge-medium {
+            background: rgba(234, 179, 8, 0.12);
+            color: var(--color-warning);
+            border: 1px solid var(--color-warning);
+        }
+
+        .badge-high {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--color-danger);
+            border: 1px solid var(--color-danger);
+        }
+
+        .risk-summary {
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            line-height: 1.4;
+        }
+
+        .sources-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+        }
+
+        /* DATA TABLES */
+        .data-panel {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-4);
+        }
+
+        .data-group {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: var(--space-3);
+        }
+
+        .group-header {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: var(--space-2);
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table td, .data-table th {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border-subtle);
+            text-align: left;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table td:first-child {
+            color: var(--text-muted);
+            width: 38%;
+            font-size: var(--font-xs);
+        }
+
+        .data-table td:last-child {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            text-align: right;
+        }
+
+        .map-frame {
+            height: 180px;
+            border: 1px solid var(--border-color);
+            margin-top: var(--space-2);
+            border-radius: var(--radius-sm);
+            overflow: hidden;
+        }
+
+        #inspect-map, #sim-map {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* FORM & CONTROLS */
+        .panel-box {
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            padding: var(--space-4);
+            border-radius: var(--radius-sm);
+        }
+
+        .control-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-3);
+            margin-bottom: var(--space-6);
+        }
+
+        .control-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: var(--space-2);
+            border-bottom: 1px solid var(--border-subtle);
+            cursor: pointer;
+        }
+
+        .control-name {
+            font-weight: 600;
+            display: block;
+            margin-bottom: 2px;
+        }
+
+        .control-desc {
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+        }
+
+        .form-row {
+            margin-bottom: var(--space-4);
+        }
+
+        .form-row label {
+            display: block;
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            color: var(--text-muted);
+            margin-bottom: var(--space-1);
+            font-weight: 600;
+        }
+
+        .form-input {
+            width: 100%;
+            background: var(--bg-root);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            padding: var(--space-2);
+            font-family: inherit;
+            font-size: var(--font-sm);
+            border-radius: var(--radius-sm);
+            transition: border-color var(--transition-fast);
+        }
+
+        .form-input:focus {
+            border-color: var(--border-focus);
+        }
+
+        select.form-input {
+            appearance: none;
+            -webkit-appearance: none;
+            padding-right: 30px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%239A9AA3' stroke-width='1.5'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            cursor: pointer;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: var(--space-3);
+        }
+
+        .row-between {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .btn-link {
+            background: none;
+            border: none;
+            color: var(--accent-blue);
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            cursor: pointer;
+        }
+
+        /* BUTTONS */
+        .action-bar {
+            display: flex;
+            gap: var(--space-3);
+            margin-top: var(--space-6);
+        }
+
+        .btn {
+            padding: var(--space-2) var(--space-4);
+            border-radius: var(--radius-sm);
+            font-family: inherit;
+            font-size: var(--font-sm);
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            cursor: pointer;
+            border: none;
+            transition: background-color var(--transition-fast), transform var(--transition-fast);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: var(--accent-ink);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+        }
+
+        .btn-secondary {
+            background: var(--bg-hover);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-active);
+        }
+
+        .btn-danger {
+            background: rgba(239, 68, 68, 0.12);
+            color: var(--color-danger);
+            border: 1px solid var(--color-danger);
+        }
+
+        .btn-danger:hover {
+            background: var(--color-danger);
+            color: #fff;
+        }
+
+        /* MAPLIBRE DARK CHROME (OpenFreeMap dark ships pre-darkened) */
+        .maplibregl-map {
+            background: var(--bg-root);
+            font-family: inherit;
+        }
+
+        .maplibregl-canvas {
+            outline: none;
+        }
+
+        .obskur-reticle {
+            background: none;
+            border: none;
+            cursor: default;
+        }
+
+        .maplibregl-popup-content {
+            background: var(--bg-surface);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-sm);
+            padding: 10px 12px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            line-height: 1.6;
+            box-shadow: none;
+        }
+
+        .maplibregl-popup-content b {
+            letter-spacing: 0.04em;
+        }
+
+        .maplibregl-popup-content svg {
+            vertical-align: -2px;
+        }
+
+        .maplibregl-popup-anchor-top .maplibregl-popup-tip,
+        .maplibregl-popup-anchor-top-left .maplibregl-popup-tip,
+        .maplibregl-popup-anchor-top-right .maplibregl-popup-tip {
+            border-bottom-color: var(--bg-surface);
+        }
+
+        .maplibregl-popup-anchor-bottom .maplibregl-popup-tip,
+        .maplibregl-popup-anchor-bottom-left .maplibregl-popup-tip,
+        .maplibregl-popup-anchor-bottom-right .maplibregl-popup-tip {
+            border-top-color: var(--bg-surface);
+        }
+
+        .maplibregl-popup-anchor-left .maplibregl-popup-tip {
+            border-right-color: var(--bg-surface);
+        }
+
+        .maplibregl-popup-anchor-right .maplibregl-popup-tip {
+            border-left-color: var(--bg-surface);
+        }
+
+        .maplibregl-popup-close-button {
+            color: var(--text-dark);
+        }
+
+        .maplibregl-ctrl-group {
+            background: var(--bg-surface);
+            box-shadow: none;
+        }
+
+        .maplibregl-ctrl-group button {
+            background-color: var(--bg-surface);
+        }
+
+        .maplibregl-ctrl-group button .maplibregl-ctrl-icon {
+            filter: invert(1);
+        }
+
+        .maplibregl-ctrl-attrib {
+            background: rgba(3, 12, 24, 0.85);
+            color: var(--text-dark);
+            font-size: 9px;
+        }
+
+        .maplibregl-ctrl-attrib a {
+            color: var(--text-muted);
+        }
+
+        .sim-geo-display {
+            font-size: var(--font-sm);
+            color: var(--text-muted);
+            margin-bottom: var(--space-2);
+        }
+
+        .map-frame-sim {
+            margin-bottom: var(--space-4);
+        }
+
+        .control-info {
+            flex: 1;
+        }
+
+        input[type="checkbox"] {
+            appearance: none;
+            -webkit-appearance: none;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            border: 1px solid var(--text-muted);
+            border-radius: 2px;
+            background: transparent;
+            cursor: pointer;
+            position: relative;
+            transition: border-color var(--transition-fast), background-color var(--transition-fast);
+        }
+
+        input[type="checkbox"]:hover {
+            border-color: var(--text-primary);
+        }
+
+        input[type="checkbox"]:checked {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        input[type="checkbox"]:checked::after {
+            content: "";
+            position: absolute;
+            left: 5px;
+            top: 2px;
+            width: 4px;
+            height: 8px;
+            border: solid var(--accent-ink);
+            border-width: 0 2px 2px 0;
+            transform: rotate(42deg);
+        }
+
+        @media (forced-colors: active) {
+            input[type="checkbox"] {
+                appearance: auto;
+                width: 18px;
+                height: 18px;
+            }
+            input[type="checkbox"]::after {
+                content: none;
+            }
+        }
+
+        input[type="number"] {
+            width: 100%;
+        }
+
+        select {
+            width: 100%;
+        }
+
+        kbd {
+            font-family: var(--font-mono);
+            font-size: var(--font-xs);
+            background: var(--bg-hover);
+            border: 1px solid var(--border-color);
+            border-bottom-width: 2px;
+            border-radius: var(--radius-sm);
+            padding: 1px 6px;
+            white-space: nowrap;
+        }
+
+        /* OBSKUR responsive — desktop-first, collapse gracefully */
+        @media (max-width: 1024px) {
+            .workspace {
+                padding: var(--space-6) var(--space-4);
+            }
+            .inspect-layout {
+                grid-template-columns: 1fr;
+            }
+            .spec-panel {
+                max-width: 560px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                overflow: auto;
+            }
+            .app-shell {
+                height: auto;
+                min-height: 100vh;
+            }
+            .app-body {
+                flex-direction: column;
+            }
+            .sidebar {
+                width: 100%;
+                border-right: none;
+                border-bottom: 1px solid var(--border-color);
+                padding: var(--space-2);
+                position: sticky;
+                top: 0;
+                z-index: 20;
+                background: var(--bg-surface);
+            }
+            .sidebar .nav-group {
+                margin-bottom: var(--space-2);
+            }
+            .sidebar nav.nav-group {
+                display: flex;
+                gap: 4px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+            .sidebar .nav-label,
+            .sidebar-footer {
+                display: none;
+            }
+            .nav-item {
+                white-space: nowrap;
+                min-height: 44px;
+                width: auto;
+                flex-shrink: 0;
+            }
+            .workspace {
+                padding: var(--space-4) var(--space-3);
+                overflow: visible;
+            }
+            .workspace-view, .drop-wrapper {
+                padding: var(--space-4);
+            }
+            .view-header {
+                flex-direction: column;
+                gap: var(--space-3);
+                align-items: stretch;
+            }
+            .view-header .view-actions {
+                display: flex;
+                flex-wrap: wrap;
+                gap: var(--space-2);
+            }
+            .drop-box {
+                width: min(320px, 82vw);
+                height: min(320px, 82vw);
+            }
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+            .action-bar {
+                flex-wrap: wrap;
+            }
+            .action-bar .btn {
+                flex: 1 1 100%;
+                min-height: 44px;
+            }
+            .top-bar {
+                height: auto;
+                min-height: 56px;
+                flex-wrap: wrap;
+                gap: var(--space-2);
+                padding: var(--space-2) var(--space-3);
+            }
+            .brand-logo {
+                height: 26px;
+            }
+            .map-frame {
+                height: 220px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .brand-tagline,
+            .system-status > span:nth-child(3) {
+                display: none;
+            }
+            .workspace {
+                padding: var(--space-3) var(--space-2);
+            }
+            .drop-wrapper {
+                margin-top: var(--space-6);
+            }
+            .panel-box {
+                padding: var(--space-3);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-shell">
+        <!-- TOP UTILITY BAR -->
+        <header class="top-bar">
+            <div class="brand">
+                <button id="brand-home" class="brand-home" type="button" aria-label="OBSKUR — homepage" title="Homepage">
+                    <img class="brand-logo" src="{{ url_for('static', filename='logo.png') }}" alt="OBSKUR">
+                </button>
+                <span class="version-tag">v4.0.0-obskur</span>
+                <span class="brand-tagline">STAY IN THE DARK</span>
+            </div>
+
+            <div class="system-status">
+                <span class="sec-indicator">✓ SECURE_ENVIRONMENT</span>
+                <span>|</span>
+                <span>CLIENT_ONLY_MODE</span>
+                <span>|</span>
+                <div class="lang-toggle" id="lang-toggle" data-current="en" role="group" aria-label="Language">
+                    <span class="lang-thumb" aria-hidden="true"></span>
+                    <button type="button" data-lang="en" class="active">EN</button>
+                    <button type="button" data-lang="tr">TR</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="app-body">
+            <!-- NAVIGATION SIDEBAR -->
+            <aside class="sidebar">
+                <nav class="nav-group">
+                    <div class="nav-label">MODULES</div>
+                    <button class="nav-item" data-target="view-inspect" data-requires-file>
+                        <span class="nav-key">01</span> Metadata Inspector
+                    </button>
+                    <button class="nav-item" data-target="view-clean" data-requires-file>
+                        <span class="nav-key">02</span> Selective Sanitizer
+                    </button>
+                    <button class="nav-item" data-target="view-simulate" data-requires-file>
+                        <span class="nav-key">03</span> Profile Simulator
+                    </button>
+                    <button class="nav-item" data-target="view-batch">
+                        <span class="nav-key">04</span> Batch Processor
+                    </button>
+                    <button class="nav-item" data-target="view-edit" data-requires-file>
+                        <span class="nav-key">05</span> Tag Editor
+                    </button>
+                </nav>
+
+                <nav class="nav-group">
+                    <div class="nav-label">SYSTEM</div>
+                    <button class="nav-item" data-target="view-history">
+                        <span class="nav-key">06</span> Session Audit
+                    </button>
+                    <button class="nav-item" data-target="view-settings">
+                        <span class="nav-key">07</span> Configuration
+                    </button>
+                </nav>
+
+                <div class="sidebar-footer">
+                    <div class="audit-badge">
+                        <span class="dot"></span> CLIENT_VALIDATION_OK
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN WORKSPACE -->
+            <main class="workspace">
+                
+                <!-- DROPZONE / INITIAL STATE -->
+                <section id="dropzone-section" class="drop-wrapper">
+                    <div class="drop-hero-header">
+                        <h2>Inspect &amp; strip image metadata</h2>
+                        <p>100% local. Nothing transmitted.</p>
+                    </div>
+
+                    <div id="dropzone" class="drop-box">
+                        <input type="file" id="file-input" accept="image/jpeg,image/png,image/webp,.heic,.heif" hidden>
+                        <div class="drop-icon-container">
+                            <span class="drop-icon">
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                                    <path d="M10 2.5v10M6 6.5l4-4 4 4" stroke="currentColor" stroke-width="1.5"/>
+                                    <path d="M3.5 13.5v3h13v-3" stroke="currentColor" stroke-width="1.5"/>
+                                </svg>
+                            </span>
+                        </div>
+                        <div class="drop-text-group">
+                            <div class="drop-primary">Select or drop target image file</div>
+                            <div class="drop-secondary">Supports JPEG, PNG, WEBP, HEIC (Max 16MB)</div>
+                        </div>
+                    </div>
+
+                    <div class="local-processing-banner">
+                        <svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                            <rect x="3" y="7" width="10" height="7" stroke="#A9C3D9" stroke-width="1.5"/>
+                            <path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" stroke="#A9C3D9" stroke-width="1.5"/>
+                        </svg>
+                        <span><strong>100% Local Processing:</strong> Images are processed entirely in memory. Zero external server transfers.</span>
+                    </div>
+                </section>
+
+                <!-- 01 INSPECTION VIEW -->
+                <section id="view-inspect" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>Metadata Inspection & Risk Analysis</h2>
+                        <div class="view-actions">
+                            <button id="btn-new-image" class="btn btn-secondary">← New image</button>
+                            <button id="btn-goto-clean" class="btn btn-secondary">Open Sanitizer →</button>
+                            <button id="btn-inspect-report" class="btn btn-secondary">JSON Report</button>
+                            <button id="btn-inspect-copy" class="btn btn-secondary">Copy JSON</button>
+                        </div>
+                    </div>
+
+                    <div class="inspect-layout">
+                        <!-- Left Specs Sidebar -->
+                        <div class="spec-panel">
+                            <div class="panel-section">
+                                <div class="preview-box">
+                                    <img id="inspect-preview" alt="Target Preview" style="display:none;">
+                                </div>
+                                <div class="file-details">
+                                    <div class="detail-row"><span>Filename</span><strong id="meta-filename" class="mono">-</strong></div>
+                                    <div class="detail-row"><span>Dimensions</span><strong id="meta-specs" class="mono">-</strong></div>
+                                    <div class="detail-row"><span>Security</span><strong class="mono text-safe">VALIDATED</strong></div>
+                                </div>
+                            </div>
+
+                            <div class="panel-section risk-frame">
+                                <div class="section-title">PRIVACY RISK INDEX</div>
+                                <div class="risk-score-box">
+                                    <div class="score-num"><span id="score-val">100</span><span class="score-denom">/100</span></div>
+                                    <div id="risk-badge" class="risk-tag">SAFE</div>
+                                </div>
+                                <div id="risk-desc" class="risk-summary">-</div>
+                            </div>
+
+                            <div class="panel-section">
+                                <div class="section-title">CONTAINER HEADERS</div>
+                                <div id="sources-list" class="sources-grid"></div>
+                            </div>
+                        </div>
+
+                        <!-- Right Tables & Map -->
+                        <div class="data-panel">
+                            <!-- MAP CARD -->
+                            <div id="map-card" class="data-group hidden">
+                                <div class="group-header">
+                                    <span>GPS GEOLOCATION AUDIT</span>
+                                    <span id="geo-country-city" class="geo-text">Detecting...</span>
+                                </div>
+                                <div class="map-frame">
+                                    <div id="inspect-map"></div>
+                                </div>
+                            </div>
+
+                            <div class="data-group">
+                                <div class="group-header">GPS & GEOLOCATION DATA</div>
+                                <table class="data-table" id="table-location"><tbody></tbody></table>
+                            </div>
+
+                            <div class="data-group">
+                                <div class="group-header">CAMERA HARDWARE</div>
+                                <table class="data-table" id="table-camera"><tbody></tbody></table>
+                            </div>
+
+                            <div class="data-group">
+                                <div class="group-header">DATE & TIME INFORMATION</div>
+                                <table class="data-table" id="table-datetime"><tbody></tbody></table>
+                            </div>
+
+                            <div class="data-group">
+                                <div class="group-header">SOFTWARE & PROCESSING</div>
+                                <table class="data-table" id="table-software"><tbody></tbody></table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 02 SANITIZER VIEW -->
+                <section id="view-clean" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>Selective Metadata Sanitizer</h2>
+                        <p class="view-sub">Remove specific EXIF headers or perform complete purge.</p>
+                    </div>
+
+                    <div class="panel-box">
+                        <div class="control-list">
+                            <label class="control-row">
+                                <div class="control-info">
+                                    <span class="control-name">GPS Location & Coordinates</span>
+                                    <span class="control-desc">Removes latitude, longitude, altitude and related geolocation data.</span>
+                                </div>
+                                <input type="checkbox" id="clean-gps" checked>
+                            </label>
+
+                            <label class="control-row">
+                                <div class="control-info">
+                                    <span class="control-name">Camera Hardware Tags</span>
+                                    <span class="control-desc">Strips manufacturer, model, serial numbers and lens parameters.</span>
+                                </div>
+                                <input type="checkbox" id="clean-camera" checked>
+                            </label>
+
+                            <label class="control-row">
+                                <div class="control-info">
+                                    <span class="control-name">Chronology & Timestamps</span>
+                                    <span class="control-desc">Strips original capture date, digitized time and EXIF timestamps.</span>
+                                </div>
+                                <input type="checkbox" id="clean-datetime" checked>
+                            </label>
+
+                            <label class="control-row">
+                                <div class="control-info">
+                                    <span class="control-name">Software Processing Tags</span>
+                                    <span class="control-desc">Strips editing software, post-processing history and firmware version.</span>
+                                </div>
+                                <input type="checkbox" id="clean-software" checked>
+                            </label>
+
+                            <label class="control-row">
+                                <div class="control-info">
+                                    <span class="control-name">Ownership & User Comments</span>
+                                    <span class="control-desc">Strips artist, copyright notices, and custom EXIF text comments.</span>
+                                </div>
+                                <input type="checkbox" id="clean-desc" checked>
+                            </label>
+                        </div>
+
+                        <div class="action-bar">
+                            <button id="btn-action-clean" class="btn btn-primary">Sanitize Selected Headers & Download</button>
+                            <button id="btn-action-purge" class="btn btn-danger">Complete Metadata Purge & Download</button>
+                        </div>
+                        <div class="action-bar">
+                            <button id="btn-audit-clean" class="btn btn-secondary">Preview Before/After Audit</button>
+                            <button id="btn-report-clean" class="btn btn-secondary">Download JSON Report</button>
+                        </div>
+                        <div id="audit-result-clean" class="panel-box hidden" style="margin-top:16px;">
+                            <div class="section-title">AUDIT PREVIEW — BEFORE → AFTER</div>
+                            <div id="audit-result-clean-body" class="mono" style="font-size:12px; white-space:pre-wrap;"></div>
+                        </div>
+                    </div>
+
+                    <div class="panel-box" style="margin-top:16px;">
+                        <div class="section-title" id="blur-title">GPS BLUR</div>
+                        <p class="view-sub" id="blur-sub" style="margin-bottom:12px;">Round coordinates to a coarse grid and drop altitude. Other tags stay intact.</p>
+                        <div class="form-row">
+                            <label id="blur-precision-label">BLUR PRECISION</label>
+                            <select id="blur-precision" class="form-input">
+                                <option value="city">City (~11 km)</option>
+                                <option value="district" selected>District (~1 km)</option>
+                                <option value="street">Street (~100 m)</option>
+                            </select>
+                        </div>
+                        <div class="action-bar">
+                            <button id="btn-action-blur" class="btn btn-primary">Blur GPS & Download</button>
+                            <button id="btn-audit-blur" class="btn btn-secondary">Preview Blur Audit</button>
+                        </div>
+                    </div>
+
+                    <div class="panel-box" style="margin-top:16px;">
+                        <div class="section-title" id="share-title">SHARE PRESETS</div>
+                        <p class="view-sub" id="share-sub">One-tap exports for social platforms.</p>
+                        <p class="view-sub" id="share-note" style="margin-top:4px;">Always strips metadata and exports JPEG, resized to the platform limit.</p>
+                        <div class="action-bar" style="flex-wrap:wrap;">
+                            <button class="btn btn-secondary" data-preset="instagram">Instagram</button>
+                            <button class="btn btn-secondary" data-preset="x">X</button>
+                            <button class="btn btn-secondary" data-preset="whatsapp">WhatsApp</button>
+                            <button class="btn btn-secondary" data-preset="original">Original</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 03 SIMULATE VIEW -->
+                <section id="view-simulate" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>Synthetic Profile Injection</h2>
+                        <p class="view-sub">Inject custom/synthetic EXIF tags for testing and verification.</p>
+                    </div>
+
+                    <div class="panel-box">
+                        <div class="form-row">
+                            <label>HARDWARE PROFILE</label>
+                            <select id="sim-profile" class="form-input">
+                                <option value="smartphone">Apple iPhone 15 Pro</option>
+                                <option value="dslr">Canon EOS R5 DSLR</option>
+                                <option value="generic">Generic Synthetic Identifier</option>
+                            </select>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-row">
+                                <label>MANUFACTURER</label>
+                                <input type="text" id="sim-make" class="form-input" placeholder="Apple">
+                            </div>
+                            <div class="form-row">
+                                <label>MODEL</label>
+                                <input type="text" id="sim-model" class="form-input" placeholder="iPhone 15 Pro">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="row-between">
+                                <label>TARGET COORDINATES (CLICK MAP TO PICK)</label>
+                                <button id="btn-sim-random-gps" class="btn-link">Randomize Coordinates</button>
+                            </div>
+                            <div class="sim-geo-display"><span class="sim-geo-label">Selected Location:</span> <strong id="sim-geo-address">Ankara, Turkey</strong></div>
+                            <div class="map-frame map-frame-sim">
+                                <div id="sim-map"></div>
+                            </div>
+                        </div>
+
+                        <div class="form-grid">
+                            <div class="form-row">
+                                <label>LATITUDE</label>
+                                <input type="number" step="any" id="sim-lat" class="form-input" value="39.9334">
+                            </div>
+                            <div class="form-row">
+                                <label>LONGITUDE</label>
+                                <input type="number" step="any" id="sim-lng" class="form-input" value="32.8597">
+                            </div>
+                        </div>
+
+                        <div class="action-bar">
+                            <button id="btn-action-simulate" class="btn btn-primary">Inject Synthetic Metadata & Download</button>
+                            <button id="btn-audit-sim" class="btn btn-secondary">Preview Spoof Audit</button>
+                        </div>
+                        <div id="audit-result-sim" class="panel-box hidden" style="margin-top:16px;">
+                            <div class="section-title">SPOOF AUDIT PREVIEW</div>
+                            <div id="audit-result-sim-body" class="mono" style="font-size:12px; white-space:pre-wrap;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 04 BATCH VIEW -->
+                <section id="view-batch" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>Batch Processor</h2>
+                        <p class="view-sub">Process up to 20 images at once, download as ZIP.</p>
+                    </div>
+                    <div class="panel-box">
+                        <div class="form-row">
+                            <label>BATCH MODE</label>
+                            <select id="batch-mode" class="form-input">
+                                <option value="purge">Full purge (all metadata)</option>
+                                <option value="selective">Selective (mirror sanitizer checkboxes)</option>
+                                <option value="blur">Blur GPS (district precision)</option>
+                                <option value="spoof">Spoof with generic profile + Ankara coords</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <label>SELECT IMAGES (max 20, 16MB each)</label>
+                            <input type="file" id="batch-input" class="form-input" accept="image/jpeg,image/png,image/webp,.heic,.heif" multiple>
+                        </div>
+                        <div id="batch-list" class="mono" style="font-size:12px; color:var(--text-muted); margin-bottom:12px;">No files selected.</div>
+                        <div class="action-bar">
+                            <button id="btn-action-batch" class="btn btn-primary">Process Batch & Download ZIP</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 05 TAG EDITOR VIEW -->
+                <section id="view-edit" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>Single-Tag EXIF Editor</h2>
+                        <p class="view-sub">Edit individual tags in place, then download.</p>
+                    </div>
+                    <div class="panel-box">
+                        <div class="form-grid">
+                            <div class="form-row"><label>MAKE</label><input type="text" id="edit-make" class="form-input" placeholder="Canon"></div>
+                            <div class="form-row"><label>MODEL</label><input type="text" id="edit-model" class="form-input" placeholder="EOS R5"></div>
+                        </div>
+                        <div class="form-row"><label>SOFTWARE</label><input type="text" id="edit-software" class="form-input" placeholder="Lightroom"></div>
+                        <div class="form-grid">
+                            <div class="form-row"><label>ARTIST</label><input type="text" id="edit-artist" class="form-input" placeholder="Author"></div>
+                            <div class="form-row"><label>COPYRIGHT</label><input type="text" id="edit-copyright" class="form-input" placeholder="© 2026"></div>
+                        </div>
+                        <div class="form-row"><label>DESCRIPTION</label><input type="text" id="edit-imagedescription" class="form-input" placeholder="Description"></div>
+                        <div class="form-row"><label>DATE TAKEN (YYYY:MM:DD HH:MM:SS)</label><input type="text" id="edit-datetimeoriginal" class="form-input" placeholder="2024:01:15 14:32:45"></div>
+                        <label class="control-row"><div class="control-info"><span class="control-name">Delete GPS block</span></div><input type="checkbox" id="edit-del-gps"></label>
+                        <div class="action-bar">
+                            <button id="btn-action-edit" class="btn btn-primary">Apply Edits & Download</button>
+                            <button id="btn-audit-edit" class="btn btn-secondary">Preview Edit Audit</button>
+                        </div>
+                        <div id="audit-result-edit" class="panel-box hidden" style="margin-top:16px;">
+                            <div class="section-title">EDIT AUDIT PREVIEW</div>
+                            <div id="audit-result-edit-body" class="mono" style="font-size:12px; white-space:pre-wrap;"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 04 HISTORY VIEW -->
+                <section id="view-history" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>Session Audit Log</h2>
+                        <div class="view-actions">
+                            <button id="btn-history-csv" class="btn btn-secondary">Export CSV</button>
+                            <button id="btn-history-print" class="btn btn-secondary">Print</button>
+                        </div>
+                    </div>
+                    <div class="panel-box">
+                        <p class="view-sub" style="margin-bottom:12px;">Log of all operations processed during the active session.</p>
+                        <table class="data-table">
+                            <thead>
+                                <tr><th>Target File</th><th>Operation Type</th><th>Timestamp</th><th>Status</th></tr>
+                            </thead>
+                            <tbody id="history-tbody">
+                                <tr><td colspan="4" style="color:var(--text-muted); text-align:center;">No session operations recorded in RAM</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <!-- 05 CONFIGURATION VIEW -->
+                <section id="view-settings" class="workspace-view hidden">
+                    <div class="view-header">
+                        <h2>System Configuration</h2>
+                        <p class="view-sub">Local engine execution parameters.</p>
+                    </div>
+                    <div class="panel-box">
+                        <div class="control-row">
+                            <div class="control-info">
+                                <span class="control-name">JPEG Export Quality Ratio</span>
+                                <span class="control-desc">Sets re-compression density for processed JPEG containers.</span>
+                            </div>
+                            <select id="setting-quality" class="form-input" style="width: 140px;">
+                                <option value="95" selected>95 (High)</option>
+                                <option value="100">100 (Lossless)</option>
+                                <option value="85">85 (Standard)</option>
+                            </select>
+                        </div>
+                        <div class="control-row" style="margin-top: 12px;">
+                            <div class="control-info">
+                                <span class="control-name">Memory Security Scrub</span>
+                                <span class="control-desc">Force garbage collection immediately after processing.</span>
+                            </div>
+                            <input type="checkbox" checked disabled>
+                        </div>
+                        <div class="control-row" style="margin-top: 12px;">
+                            <div class="control-info">
+                                <span class="control-name">Online Reverse-Geocode</span>
+                                <span class="control-desc">Off = 100% local (coords only). On = resolve city/country via Nominatim.</span>
+                            </div>
+                            <input type="checkbox" id="setting-geocode" checked>
+                        </div>
+                    </div>
+
+                    <div class="panel-box" style="margin-top:16px;">
+                        <div class="section-title" id="sc-title">KEYBOARD SHORTCUTS</div>
+                        <p class="view-sub" id="sc-sub" style="margin-bottom:12px;">Available anywhere except while typing.</p>
+                        <table class="data-table">
+                            <tbody>
+                                <tr><td class="mono"><kbd>1</kbd> – <kbd>7</kbd></td><td id="sc-row-modules">Switch modules</td></tr>
+                                <tr><td class="mono"><kbd>Ctrl/⌘ U</kbd></td><td id="sc-row-upload">Upload image</td></tr>
+                                <tr><td class="mono"><kbd>Esc</kbd></td><td id="sc-row-back">Back to upload screen</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/i18n.js') }}?v=9"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}?v=9"></script>
+</body>
+</html>

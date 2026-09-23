@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+# Venv
+venv/
+.venv/
+# Pytest / coverage
+.pytest_cache/
+.coverage
+htmlcov/
+# Env / secrets
+.env
+.env.*
+# OS / IDE
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+# Local AI-agent tooling (huge vendored skill copies, machine-specific)
+.agent/
+.claude/
+.cursor/
+.gemini/
+.impeccable/
+# Local uploads / outputs
+*.log
+*.zip
+cleaned_*.*
+purged_*.*
+blurred_*.*
+simulated_*.*
+edited_*.*
+custom_*.*
+obskur_batch_*.zip
